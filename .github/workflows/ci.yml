@@ -24,8 +24,31 @@ jobs:
       - name: Install check dependencies
         run: python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt
 
-      - name: Run quality and security checks
-        run: python scripts/check.py
+      - name: Check code formatting
+        run: |
+          mkdir -p logs
+          set -o pipefail
+          python -m ruff format --check main.py 2>&1 | tee logs/formatting.log
+
+      - name: Run linting
+        run: |
+          set -o pipefail
+          python -m ruff check main.py 2>&1 | tee logs/linting.log
+
+      - name: Run static type checking
+        run: |
+          set -o pipefail
+          python -m pyright main.py 2>&1 | tee logs/type-checking.log
+
+      - name: Run security scan
+        run: |
+          set -o pipefail
+          python -m bandit -q -r main.py 2>&1 | tee logs/security.log
+
+      - name: Run dependency vulnerability scan
+        run: |
+          set -o pipefail
+          python -m pip_audit -r requirements-dev.txt 2>&1 | tee logs/dependency-audit.log
 
       - name: Upload check log
         if: always()

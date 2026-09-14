@@ -25,27 +25,32 @@ jobs:
         run: python -m pip install --upgrade pip && python -m pip install -r requirements-dev.txt
 
       - name: Check code formatting
+        if: always()
         run: |
           mkdir -p logs
           set -o pipefail
           python -m ruff format --check main.py 2>&1 | tee logs/formatting.log
 
       - name: Run linting
+        if: always()
         run: |
           set -o pipefail
           python -m ruff check main.py 2>&1 | tee logs/linting.log
 
       - name: Run static type checking
+        if: always()
         run: |
           set -o pipefail
           python -m pyright main.py 2>&1 | tee logs/type-checking.log
 
       - name: Run security scan
+        if: always()
         run: |
           set -o pipefail
           python -m bandit -q -r main.py 2>&1 | tee logs/security.log
 
       - name: Run dependency vulnerability scan
+        if: always()
         run: |
           set -o pipefail
           python -m pip_audit -r requirements-dev.txt 2>&1 | tee logs/dependency-audit.log
